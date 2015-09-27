@@ -1,3 +1,80 @@
+(defpackage "COLOUR"
+  (:use "COMMON-LISP"))
+(in-package "COLOUR")
+
+;;; for now, let's just pretend that everything is tricrhomatic light
+
+#| light + light = light|#
+#| light + filter = light|#
+#| filter + filter = filter|#
+
+(defclass colour ()
+  ())
+(defclass colour-space ()
+  ((primaries)))
+(defvar +XYZ+
+  (make-instance 'colour-space
+                 :primaries '((1 0 0) (0 1 0) (0 0 1))))
+(defvar +sRGB+
+  (make-instance 'colour-space
+                 :primaries '((0.4124 0.3576 0.1805)
+                              (0.2126 0.7152 0.0722)
+                              (0.0193 0.1192 0.9505))))
+
+(defun submatrix/1 (matrix i)
+  (mapcar (lambda (x) (append (subseq x 0 i) (subseq x (1+ i))))
+          matrix))
+
+(defun submatrix/2 (matrix i j)
+  (mapcar (lambda (x) (append (subseq x 0 i) (subseq x (1+ i))))
+          (append (subseq matrix 0 j) (subseq matrix (1+ j)))))
+
+(defun determinant (matrix)
+  (if (= (length matrix) 1)
+      (caar matrix)
+      (loop for x in (car matrix)
+           for k upfrom 0
+         for i = 1 then (* i -1)
+         sum (* i x (determinant (submatrix/1 (cdr matrix) k))))))
+
+(defun transpose (matrix)
+  (apply #'mapcar #'list matrix))
+
+(defun m* (m1 m2)
+  (let ((m2 (transpose m2)))
+    (loop for x1 in m1
+       collect (loop for x2 in m2
+                  collect (loop for y1 in x1 for y2 in x2
+                               sum (* y1 y2))))))
+
+(defun invert (matrix)
+  (loop for i from 0 for l in matrix for f = 1 then (* f -1)
+     collect (loop for j from 0 for l in matrix for g = 1 then (* g -1)
+                collect
+                  (* f g (determinant (submatrix/2 matrix i j))))))
+
+    e2
+   /
+  /   x
+ /________e1
+
+x = a e1 + b e2
+
+dot product with z unit vector at right angles to e2:
+x.z = a e1.z
+a = x.z/e1.z
+b = x.w/e2.w
+
+e1.z = cos 30 in this case = 1/2
+x = 1,1
+e2 = 1/2, sqrt3/2
+z = sqrt3/2, -1/2
+w = 0,1
+a = (sqrt3/2-1/2)/(sqrt3/2) = 1-1/sqrt3
+b = 1/(sqrt3/2)
+
+
+
 ;;; Implements colour conversions between sRGB, CIE XYZ / xyY and CIE
 ;;; L*a*b* (1976) colour spaces.  A complete implementation would
 ;;; handle details such as white point (illuminant) and viewing angle,
@@ -144,7 +221,7 @@
           (char= (char x 0) #\#))
      (%make-rgb-colour (/ (parse-integer x :start 1 :end 3 :radix 16) 255)
                        (/ (parse-integer x :start 3 :end 5 :radix 16) 255)
-                       (/ (parse-integer x :start 5 :end 7 :radix 16) 255))))))
+                       (/ (parse-integer x :start 5 :end 7 :radix 16) 255)))))
 
 (defmacro with-xyz ((&rest names) c &body body)
   (let ((col (gensym "COL")))
