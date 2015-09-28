@@ -41,7 +41,16 @@
           (Δb² (expt (- b₁ b₂) 2)))
       (sqrt (+ ΔL² Δa² Δb²)))))
 
-(defun lerp (v c₁ c₂)
+;;; FIXME: the choice of CIELAB here is somewhat arbitrary; doing
+;;; linear interpolation in some transformation of CIELAB (or,
+;;; equivalently, curve interpolation in CIELAB) might get better
+;;; results.  Find a way to allow the user to specify the colour
+;;; space?
+(defun palette (n c₁ c₂)
   (c.c:with-colours (((CIELAB c₁) L₁ a₁ b₁)
                      ((CIELAB c₂) L₂ a₂ b₂))
-    ))
+    (loop for v from 0 to 1 by (/ 1 n)
+          for L = (alexandria:lerp v L₁ L₂)
+          for a = (alexandria:lerp v a₁ a₂)
+          for b = (alexandria:lerp v b₁ b₂)
+          collect (c.c:make-colour 'CIELAB L a b))))
