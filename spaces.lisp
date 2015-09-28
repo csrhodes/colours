@@ -17,6 +17,7 @@
     c))
 
 (define-colour-space RGB rgb)
+(define-colour-space HSB hsb)
 (define-colour-space XYZ xyz)
 (define-colour-space xyY)
 (define-colour-space sRGB)
