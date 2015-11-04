@@ -9,7 +9,6 @@
            "sRGB/linear"
            "CIELAB" "cielab"))
 (in-package "COLOURS.SPACES")
-(export (intern "CANONICAL"))
 
 (defvar *canonical-spaces* nil)
 (defmacro define-colour-space (canonical aliases &body body &aux doc)
@@ -19,9 +18,6 @@
      (setq *canonical-spaces* (set-difference *canonical-spaces* ',aliases))
      (remprop ',canonical 'canonical)
      (remprop ',canonical 'doc)
-     ;; this is wrong.  (I think it would probably still be wrong if
-     ;; we made it export from "COLOURS.SPACES" always)
-     (export (cons ',canonical ',aliases))
      (pushnew ',canonical *canonical-spaces*)
      ,@(loop for a in aliases collect `(setf (get ',a 'canonical) ',canonical))
      ,@(when doc
