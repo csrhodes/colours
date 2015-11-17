@@ -38,6 +38,12 @@
           (Δb² (expt (- b₁ b₂) 2)))
       (sqrt (+ ΔL² Δa² Δb²)))))
 
+(defun grayscale (c white)
+  (c.c:with-colours (((XYZ c) x y z)
+                     ((XYZ white) wx wy wz))
+    (declare (ignore x z))
+    (c.c:make-colour 'XYZ (alexandria:lerp y 0 wx) (alexandria:lerp y 0 wy) (alexandria:lerp y 0 wz))))
+
 ;;; FIXME: the choice of CIELAB here is somewhat arbitrary; doing
 ;;; linear interpolation in some transformation of CIELAB (or,
 ;;; equivalently, curve interpolation in CIELAB) might get better
