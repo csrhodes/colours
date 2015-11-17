@@ -1,0 +1,21 @@
+(defpackage "COLOURS.EXAMPLES"
+  (:use "CL" "COLOURS.SPACES" "COLOURS.CONVERSIONS"))
+
+(in-package "COLOURS.EXAMPLES")
+
+(defun grayscaleize (png)
+  (declare (optimize speed))
+  (declare (type png:rgb-image png))
+  (let* ((height (png:image-height png))
+         (width (png:image-width png))
+         (result (png:make-image height width 1))
+         (toXYZ (convert 'RGB 'XYZ))
+         (fromXYZ (convert 'XYZ 'RGB)))
+    (declare (type (unsigned-byte 24) height width))
+    (dotimes (i height)
+      (dotimes (j width)
+        (let ((Y (nth-value 1 (funcall toXYZ (aref png i j 0) (aref png i j 1) (aref png i j 2)))))
+          (declare (type single-float Y))
+          (setf (aref result i j 0)
+                (nth-value 0 (funcall fromXYZ (alexandria:lerp Y 0 0.9505) Y (alexandria:lerp Y 0 1.089)))))))
+    result))
