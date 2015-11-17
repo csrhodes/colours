@@ -1,4 +1,4 @@
-(defsystem :colours
+(asdf:defsystem :colours
   :author "Christophe Rhodes <christophe@rhodes.io>"
   :description "colour and colour-space functions"
   :serial t
